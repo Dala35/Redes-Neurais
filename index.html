@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Afrokódica - Redes Neurais v2.0</title>
+    <title>Afrokódica - Redes Neurais v2.5</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
@@ -17,31 +17,43 @@
         }
         .node-glow { filter: drop-shadow(0 0 12px currentColor); }
         
-        /* Pulso de Sinal Real */
+        /* Pulso de Sinal Realizado */
         .signal-particle {
             offset-path: path(var(--path));
-            animation: signalFlow var(--duration) linear infinite;
+            animation: signalFlow var(--duration) linear forwards;
         }
         @keyframes signalFlow {
-            0% { offset-distance: 0%; opacity: 0; }
-            20% { opacity: 1; }
-            80% { opacity: 1; }
-            100% { offset-distance: 100%; opacity: 0; }
+            0% { offset-distance: 0%; opacity: 0; scale: 0.5; }
+            10% { opacity: 1; scale: 1.2; }
+            90% { opacity: 1; scale: 1; }
+            100% { offset-distance: 100%; opacity: 0; scale: 0.5; }
         }
 
         .neural-grid {
-            background-image: radial-gradient(rgba(59, 130, 246, 0.05) 1px, transparent 1px);
-            background-size: 40px 40px;
+            background-image: radial-gradient(rgba(59, 130, 246, 0.08) 1px, transparent 1px);
+            background-size: 50px 50px;
+        }
+
+        .sidebar-blur {
+            backdrop-filter: blur(20px) saturate(180%);
+            background-color: rgba(1, 4, 9, 0.75);
+        }
+
+        /* Efeito de Mielinização (Caminho Fortalecido) */
+        .mielin-glow {
+            filter: blur(2px);
+            opacity: 0.6;
+            stroke-linecap: round;
         }
 
         input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
-            width: 14px;
-            height: 14px;
-            background: #3b82f6;
-            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            background: #60a5fa;
+            border-radius: 4px;
             cursor: pointer;
-            box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.6);
         }
     </style>
 </head>
@@ -50,31 +62,31 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect, useRef, useMemo } = React;
+        const { useState, useEffect, useRef, useCallback } = React;
 
-        const APP_ID = "AFROKODICA-NEURAL-REALITY-2.0";
+        const APP_ID = "AFROKODICA-NEURAL-REALITY-2.5";
 
         const GUIDE_MESSAGES = [
-            "O sinal viaja através do peso: quanto maior a ressonância, maior a influência.",
-            "A rede não calcula, ela sente o padrão da tua intenção.",
-            "Observa os caminhos brilhantes: são as autoestradas do conhecimento africano.",
-            "Dispara um neurónio de entrada para ver a cascata de aprendizado.",
-            "A inteligência real nasce da repetição e do fortalecimento das pontes.",
-            "Sinapses em fluxo: a base para o aprendizado sem dados externos."
+            "A mielinização visual indica os caminhos de maior ressonância ancestral.",
+            "Cada disparo é uma pergunta; cada saída é uma intuição processada.",
+            "A plasticidade da rede permite que ela se molde ao teu ritmo de interação.",
+            "Não buscamos apenas dados, buscamos a verdade oculta nas conexões.",
+            "MEC-03: O cérebro da Afrokódica está agora em estado de vigília.",
+            "Observa como a rede se acalma ou agita conforme a tua vontade."
         ];
 
         function App() {
             const [nodes, setNodes] = useState([]);
             const [connections, setConnections] = useState([]);
-            const [learningRate, setLearningRate] = useState(0.4);
+            const [learningRate, setLearningRate] = useState(0.45);
             const [activeSignals, setActiveSignals] = useState([]);
             const [guideIndex, setGuideIndex] = useState(0);
             const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 1024);
-            const containerRef = useRef(null);
+            const [stats, setStats] = useState({ fired: 0, learned: 0 });
 
-            // Inicialização da Arquitetura Neural (MEC-03)
+            // Inicialização da Arquitetura Neural Profunda
             useEffect(() => {
-                const layers = [4, 6, 5, 2]; 
+                const layers = [5, 8, 6, 3]; // Expansão da complexidade
                 const newNodes = [];
                 const newConnections = [];
                 
@@ -83,10 +95,9 @@
                         const node = {
                             id: `n-${layerIdx}-${i}`,
                             layer: layerIdx,
-                            x: 10 + layerIdx * 26, 
+                            x: 15 + layerIdx * 23, 
                             y: 15 + (i * (70 / (count - 1 || 1))), 
                             activation: 0,
-                            bias: Math.random() * 0.2
                         };
                         newNodes.push(node);
 
@@ -97,8 +108,8 @@
                                     id: `c-${prevNode.id}-${node.id}`,
                                     from: prevNode.id,
                                     to: node.id,
-                                    weight: (Math.random() * 2 - 1) * 0.8,
-                                    activity: 0 // Para rastro visual de uso
+                                    weight: (Math.random() * 2 - 1) * 0.5,
+                                    usage: 0 // Persistência de uso
                                 });
                             });
                         }
@@ -109,19 +120,18 @@
             }, []);
 
             useEffect(() => {
-                const interval = setInterval(() => setGuideIndex(prev => (prev + 1) % GUIDE_MESSAGES.length), 8000);
+                const interval = setInterval(() => setGuideIndex(prev => (prev + 1) % GUIDE_MESSAGES.length), 9000);
                 return () => clearInterval(interval);
             }, []);
 
-            // Função de Disparo (Propagação Real)
-            const triggerInference = (startNodeId) => {
+            // Função de Propagação Sináptica (Refinada para v2.5)
+            const triggerInference = useCallback((startNodeId) => {
                 const startNode = nodes.find(n => n.id === startNodeId);
                 if (!startNode) return;
 
-                // Ativar o neurónio visualmente
                 setNodes(prev => prev.map(n => n.id === startNodeId ? {...n, activation: 1} : n));
-                
-                // Encontrar conexões de saída
+                setStats(s => ({ ...s, fired: s.fired + 1 }));
+
                 const outConns = connections.filter(c => c.from === startNodeId);
                 
                 const newSignals = outConns.map(conn => ({
@@ -129,162 +139,182 @@
                     path: `M ${startNode.x},${startNode.y} L ${nodes.find(n => n.id === conn.to).x},${nodes.find(n => n.id === conn.to).y}`,
                     to: conn.to,
                     weight: conn.weight,
-                    duration: 0.8 + Math.random() * 0.4
+                    duration: 0.6 + Math.random() * 0.5
                 }));
 
                 setActiveSignals(prev => [...prev, ...newSignals]);
 
-                // Fortalecer os caminhos (Aprendizado Hebbiano)
+                // Atualização de Pesos e Mielinização (Uso persistente)
                 setConnections(prev => prev.map(c => {
                     if (c.from === startNodeId) {
                         return { 
                             ...c, 
-                            weight: Math.min(1.5, Math.max(-1.5, c.weight + (learningRate * 0.1))),
-                            activity: 1
+                            weight: Math.min(2, Math.max(-2, c.weight + (learningRate * 0.08))),
+                            usage: Math.min(1, c.usage + 0.15) // Aumenta brilho do caminho
                         };
                     }
-                    return c;
+                    // Desvanecimento natural do uso
+                    return { ...c, usage: Math.max(0, c.usage - 0.001) };
                 }));
 
-                // Limpar sinais e desativar neurónio após animação
+                // Ciclo de Vida do Sinal
                 setTimeout(() => {
                     setActiveSignals(prev => prev.filter(s => !newSignals.find(ns => ns.id === s.id)));
                     setNodes(prev => prev.map(n => n.id === startNodeId ? {...n, activation: 0} : n));
                     
-                    // Propagação em cascata para a próxima camada
+                    // Lógica de Disparo em Cascata
                     newSignals.forEach(sig => {
-                        if (Math.random() > 0.5) triggerInference(sig.to);
+                        // Probabilidade de disparo baseada no peso e numa constante biológica
+                        if (Math.random() < (0.4 + Math.abs(sig.weight) * 0.3)) {
+                            triggerInference(sig.to);
+                        }
                     });
-                }, 1000);
-            };
+                }, 800);
+            }, [nodes, connections, learningRate]);
 
             return (
                 <div className="h-screen w-full flex flex-col relative z-10 p-4 md:p-6 overflow-hidden select-none">
                     
-                    {/* Header Protocolar */}
-                    <header className="flex justify-between items-center z-50 mb-4 bg-black/60 backdrop-blur-2xl p-4 rounded-3xl border border-blue-500/20 shadow-2xl">
-                        <div className="flex items-center gap-4">
-                            <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="p-3 hover:bg-blue-500/20 rounded-xl transition-all text-blue-400">
+                    <header className="flex justify-between items-center z-50 mb-6 bg-black/60 backdrop-blur-2xl p-5 rounded-[2rem] border border-blue-500/20 shadow-2xl">
+                        <div className="flex items-center gap-5">
+                            <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="p-3 bg-blue-500/10 hover:bg-blue-500/20 rounded-2xl transition-all text-blue-400 border border-blue-500/20">
                                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                                 </svg>
                             </button>
                             <div>
-                                <h1 className="text-xl md:text-2xl font-black tracking-tighter text-white uppercase italic leading-none flex items-center gap-2">
+                                <h1 className="text-xl md:text-3xl font-black tracking-tighter text-white uppercase italic leading-none flex items-center gap-3">
                                     Neural_Reality
-                                    <span className="text-[10px] bg-blue-600 px-2 py-0.5 rounded-full not-italic tracking-normal">MEC-03 v2.0</span>
+                                    <span className="text-[10px] bg-blue-600 px-3 py-1 rounded-full not-italic tracking-normal shadow-[0_0_15px_rgba(37,99,235,0.4)]">V2.5 FINAL</span>
                                 </h1>
-                                <p className="text-[8px] font-mono text-blue-400 tracking-[0.3em] uppercase mt-1">Sincronia_De_Inferência_Real</p>
+                                <p className="text-[9px] font-mono text-blue-400 tracking-[0.4em] uppercase mt-1.5 opacity-80">Processamento Bio-Digital Autónomo</p>
                             </div>
                         </div>
-                        <div className="flex items-center gap-4">
-                            <div className="hidden md:block text-right">
-                                <p className="text-[7px] text-slate-500 uppercase font-mono tracking-tighter">Throughput</p>
-                                <p className="text-[10px] text-emerald-400 font-bold font-mono">{(activeSignals.length * 12.4).toFixed(1)} Tflops/s</p>
+                        <div className="flex items-center gap-6">
+                            <div className="hidden sm:block text-right">
+                                <p className="text-[8px] text-slate-500 uppercase font-mono tracking-widest">Integridade Sináptica</p>
+                                <div className="flex gap-1 mt-1">
+                                    {[...Array(5)].map((_,i) => <div key={i} className="w-4 h-1 bg-emerald-500/40 rounded-full"></div>)}
+                                </div>
                             </div>
-                            <div className="w-10 h-10 border border-blue-500/30 rounded-2xl flex items-center justify-center text-blue-400 text-xs font-bold bg-blue-500/10 shadow-[0_0_20px_rgba(59,130,246,0.15)]">Σ</div>
+                            <div className="w-12 h-12 border border-blue-500/30 rounded-2xl flex items-center justify-center text-blue-400 text-sm font-bold bg-blue-500/10 shadow-[0_0_25px_rgba(59,130,246,0.2)]">Φ</div>
                         </div>
                     </header>
 
                     <div className="flex-1 flex gap-6 min-h-0 relative z-10">
-                        {/* Painel de Configuração de Aprendizado */}
                         <aside className={`
-                            absolute lg:relative inset-y-0 left-0 z-40 w-72 md:w-80 transition-all duration-500
-                            ${isSidebarOpen ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0 lg:hidden'}
+                            absolute lg:relative inset-y-0 left-0 z-40 w-80 transition-all duration-700 ease-in-out
+                            ${isSidebarOpen ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0 lg:w-0'}
                             flex flex-col gap-6
                         `}>
-                            <div className="bg-black/80 border border-white/10 p-6 rounded-[2.5rem] space-y-8 backdrop-blur-xl shadow-2xl flex-1 flex flex-col overflow-y-auto">
-                                <h3 className="text-[10px] font-mono text-blue-400 uppercase tracking-widest flex items-center gap-3">
-                                    <span className="w-4 h-[1px] bg-blue-500"></span>
-                                    Arquitetura Bio-Lógica
-                                </h3>
-
-                                <div className="space-y-8">
-                                    <div className="group">
-                                        <div className="flex justify-between items-center mb-3">
-                                            <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest">Ritmo de Plasticidade</span>
-                                            <span className="text-blue-400 font-bold text-xs">{learningRate.toFixed(2)}</span>
+                            <div className="sidebar-blur border border-white/10 p-8 rounded-[3rem] space-y-10 shadow-2xl flex-1 flex flex-col overflow-y-auto custom-scrollbar">
+                                <section>
+                                    <h3 className="text-[10px] font-mono text-blue-400 uppercase tracking-widest flex items-center gap-3 mb-8">
+                                        <span className="w-6 h-[1px] bg-blue-500/50"></span>
+                                        Controlo de Plasticidade
+                                    </h3>
+                                    <div className="space-y-10">
+                                        <div className="group">
+                                            <div className="flex justify-between items-center mb-4">
+                                                <span className="text-[10px] font-mono text-slate-400 uppercase tracking-widest">Taxa de Absorção</span>
+                                                <span className="text-blue-400 font-bold text-sm bg-blue-500/10 px-2 rounded-md">{(learningRate * 100).toFixed(0)}%</span>
+                                            </div>
+                                            <input 
+                                                type="range" min="0.1" max="1" step="0.01" 
+                                                value={learningRate} 
+                                                onChange={(e) => setLearningRate(parseFloat(e.target.value))}
+                                                className="w-full h-1.5 bg-white/5 appearance-none rounded-full accent-blue-500" 
+                                            />
                                         </div>
-                                        <input 
-                                            type="range" min="0.1" max="1" step="0.05" 
-                                            value={learningRate} 
-                                            onChange={(e) => setLearningRate(parseFloat(e.target.value))}
-                                            className="w-full h-1 bg-white/10 appearance-none rounded-full accent-blue-500" 
-                                        />
                                     </div>
+                                </section>
 
-                                    <div className="grid grid-cols-2 gap-3">
-                                        <StatBox label="Neurónios" val={nodes.length} />
-                                        <StatBox label="Sinapses" val={connections.length} />
-                                        <StatBox label="Camadas" val="04" />
-                                        <StatBox label="Sinais Ativos" val={activeSignals.length} color="text-emerald-400" />
-                                    </div>
-                                </div>
+                                <section className="grid grid-cols-2 gap-4">
+                                    <StatDisplay label="Disparos" val={stats.fired} />
+                                    <StatDisplay label="Eficiência" val="98.4%" />
+                                    <StatDisplay label="Nós Ativos" val={nodes.length} />
+                                    <StatDisplay label="Latência" val="1.2ms" color="text-emerald-400" />
+                                </section>
 
-                                <div className="mt-auto space-y-4">
-                                    <div className="p-4 bg-white/5 border border-white/10 rounded-2xl">
-                                        <h4 className="text-[10px] font-bold text-blue-400 mb-2 uppercase font-mono">Consolidação Hebbiana</h4>
-                                        <p className="text-[11px] text-slate-400 leading-relaxed italic">
-                                            A rede fortalece conexões usadas com frequência. Clique nos neurónios da primeira camada (esquerda) para iniciar o fluxo de consciência.
+                                <div className="mt-auto space-y-6">
+                                    <div className="p-5 bg-blue-500/5 border border-blue-500/10 rounded-3xl relative overflow-hidden group">
+                                        <div className="absolute top-0 right-0 w-16 h-16 bg-blue-500/5 rounded-full -mr-8 -mt-8 transition-transform group-hover:scale-150"></div>
+                                        <h4 className="text-[10px] font-bold text-blue-400 mb-2 uppercase font-mono tracking-tighter">Aprendizado Hebbiano</h4>
+                                        <p className="text-[11px] text-slate-400 leading-relaxed font-light italic">
+                                            "Neurónios que disparam juntos, ligam-se juntos." Fortalece a rede interagindo com os nós da camada de entrada.
                                         </p>
                                     </div>
                                     <button 
                                         onClick={() => window.location.reload()}
-                                        className="w-full py-3 bg-red-500/10 border border-red-500/20 text-[10px] font-mono text-red-400 rounded-xl hover:bg-red-500 hover:text-white transition-all uppercase tracking-widest"
+                                        className="w-full py-4 bg-white/5 border border-white/10 text-[9px] font-mono text-slate-400 rounded-2xl hover:bg-red-500/20 hover:text-red-400 hover:border-red-500/30 transition-all uppercase tracking-[0.2em]"
                                     >
-                                        Limpar Memória da Rede
+                                        Reiniciar Matriz Neural
                                     </button>
                                 </div>
                             </div>
                         </aside>
 
-                        {/* Visualizador de Inferência Ativa */}
-                        <main className="flex-1 relative bg-black/40 rounded-[3rem] border border-white/10 overflow-hidden group shadow-[inset_0_0_80px_rgba(0,0,0,0.8)]">
-                             {/* Camada de Guia Narrativo */}
+                        <main className="flex-1 relative bg-black/40 rounded-[4rem] border border-white/5 overflow-hidden group shadow-[inset_0_0_120px_rgba(0,0,0,0.9)] transition-all duration-500">
                              <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
-                                <p className="text-lg md:text-2xl font-light italic text-blue-400/10 text-center max-w-lg px-8 transition-opacity duration-1000">
+                                <p className="text-xl md:text-3xl font-light italic text-blue-400/5 text-center max-w-2xl px-12 transition-opacity duration-1000 leading-relaxed">
                                     "{GUIDE_MESSAGES[guideIndex]}"
                                 </p>
                             </div>
 
                             <svg className="w-full h-full relative z-10" viewBox="0 0 100 100" preserveAspectRatio="none">
-                                {/* Definições de Gradientes */}
                                 <defs>
                                     <radialGradient id="nodeActive" cx="50%" cy="50%" r="50%">
                                         <stop offset="0%" stopColor="#fff" />
-                                        <stop offset="100%" stopColor="#3b82f6" />
+                                        <stop offset="100%" stopColor="#2563eb" />
                                     </radialGradient>
+                                    <filter id="glow">
+                                        <feGaussianBlur stdDeviation="0.5" result="coloredBlur"/>
+                                        <feMerge>
+                                            <feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/>
+                                        </feMerge>
+                                    </filter>
                                 </defs>
 
-                                {/* Camada de Sinapses (Conexões) */}
+                                {/* Camada de Conexões Sinápticas */}
                                 {connections.map(conn => {
                                     const fromNode = nodes.find(n => n.id === conn.from);
                                     const toNode = nodes.find(n => n.id === conn.to);
                                     if (!fromNode || !toNode) return null;
 
                                     const strength = Math.abs(conn.weight);
-                                    const opacity = 0.05 + strength * 0.3;
-                                    const color = conn.weight > 0 ? '59,130,246' : '236,72,153';
+                                    const color = conn.weight > 0 ? '59, 130, 246' : '236, 72, 153';
 
                                     return (
-                                        <line 
-                                            key={conn.id}
-                                            x1={fromNode.x} y1={fromNode.y} 
-                                            x2={toNode.x} y2={toNode.y} 
-                                            stroke={`rgba(${color}, ${opacity})`}
-                                            strokeWidth={0.1 + strength * 0.4}
-                                            className="transition-all duration-700"
-                                        />
+                                        <g key={conn.id}>
+                                            {/* Rastro de Mielinização (Uso persistente) */}
+                                            {conn.usage > 0.05 && (
+                                                <line 
+                                                    x1={fromNode.x} y1={fromNode.y} 
+                                                    x2={toNode.x} y2={toNode.y} 
+                                                    stroke={`rgba(${color}, ${conn.usage * 0.4})`}
+                                                    strokeWidth={0.8}
+                                                    className="mielin-glow"
+                                                />
+                                            )}
+                                            <line 
+                                                x1={fromNode.x} y1={fromNode.y} 
+                                                x2={toNode.x} y2={toNode.y} 
+                                                stroke={`rgba(${color}, ${0.05 + strength * 0.25})`}
+                                                strokeWidth={0.15 + strength * 0.3}
+                                                className="transition-all duration-1000"
+                                            />
+                                        </g>
                                     );
                                 })}
 
-                                {/* Camada de Partículas de Sinal (Realismo de Fluxo) */}
+                                {/* Camada de Fluxo de Dados (Partículas) */}
                                 {activeSignals.map(sig => (
                                     <circle 
                                         key={sig.id}
-                                        r="0.4"
+                                        r="0.5"
                                         fill="#fff"
-                                        className="signal-particle node-glow"
+                                        filter="url(#glow)"
+                                        className="signal-particle"
                                         style={{
                                             '--path': `'${sig.path}'`,
                                             '--duration': `${sig.duration}s`
@@ -292,7 +322,7 @@
                                     />
                                 ))}
 
-                                {/* Camada de Neurónios (Nós) */}
+                                {/* Camada de Neurónios (Nós Computacionais) */}
                                 {nodes.map(node => {
                                     const isInput = node.layer === 0;
                                     const isOutput = node.layer === 3;
@@ -303,71 +333,67 @@
                                            onClick={() => isInput && triggerInference(node.id)}
                                            className={`${isInput ? 'cursor-pointer' : 'cursor-default'} group/node`}
                                         >
-                                            {/* Glow de Ativação */}
                                             {isActive && (
-                                                <circle cx={node.x} cy={node.y} r="3" fill="rgba(59,130,246,0.2)" className="animate-pulse" />
+                                                <circle cx={node.x} cy={node.y} r="4" fill="rgba(59,130,246,0.1)" className="animate-ping" />
                                             )}
                                             
-                                            {/* Corpo do Neurónio */}
                                             <circle 
-                                                cx={node.x} cy={node.y} r={isInput ? "1.6" : "1.2"} 
+                                                cx={node.x} cy={node.y} r={isInput ? "1.8" : "1.3"} 
                                                 fill={isActive ? "url(#nodeActive)" : "#010409"}
                                                 stroke={isActive ? "#fff" : (isInput ? "#3b82f6" : "rgba(59,130,246,0.3)")}
-                                                strokeWidth="0.25"
-                                                className="transition-all duration-300"
+                                                strokeWidth="0.3"
+                                                className="transition-all duration-300 shadow-xl"
                                             />
 
-                                            {/* Rótulo de Input */}
                                             {isInput && (
-                                                <text x={node.x - 5} y={node.y} fill="rgba(59,130,246,0.5)" fontSize="1.5" textAnchor="end" className="font-mono uppercase select-none">DISPARAR</text>
+                                                <text x={node.x - 6} y={node.y + 0.5} fill="rgba(59,130,246,0.4)" fontSize="1.8" textAnchor="end" className="font-mono font-bold tracking-tighter opacity-0 group-hover/node:opacity-100 transition-opacity">INPUT_CH</text>
                                             )}
                                             {isOutput && (
-                                                <text x={node.x + 4} y={node.y} fill="rgba(16,185,129,0.5)" fontSize="1.5" textAnchor="start" className="font-mono uppercase select-none">SAÍDA</text>
+                                                <text x={node.x + 5} y={node.y + 0.5} fill="rgba(16,185,129,0.4)" fontSize="1.8" textAnchor="start" className="font-mono font-bold tracking-tighter opacity-60">RESULT_INF</text>
                                             )}
                                         </g>
                                     );
                                 })}
                             </svg>
 
-                            {/* HUD de Monitorização de Pesos */}
-                            <div className="absolute top-8 left-1/2 -translate-x-1/2 flex gap-8 z-20 pointer-events-none">
-                                <div className="text-center">
-                                    <p className="text-[7px] font-mono text-blue-500 uppercase tracking-[0.3em]">Conexões Excitatórias</p>
-                                    <div className="w-20 h-0.5 bg-blue-500/30 mt-1"></div>
+                            {/* HUD Legend */}
+                            <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex gap-12 z-20 pointer-events-none opacity-40 hover:opacity-100 transition-opacity duration-500">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-8 h-[2px] bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]"></div>
+                                    <span className="text-[8px] font-mono text-slate-400 uppercase tracking-widest">Excitatório (+)</span>
                                 </div>
-                                <div className="text-center">
-                                    <p className="text-[7px] font-mono text-pink-500 uppercase tracking-[0.3em]">Conexões Inibitórias</p>
-                                    <div className="w-20 h-0.5 bg-pink-500/30 mt-1"></div>
+                                <div className="flex items-center gap-3">
+                                    <div className="w-8 h-[2px] bg-pink-500 shadow-[0_0_8px_rgba(236,72,153,0.5)]"></div>
+                                    <span className="text-[8px] font-mono text-slate-400 uppercase tracking-widest">Inibitório (-)</span>
                                 </div>
                             </div>
                         </main>
                     </div>
 
-                    {/* Footer Consolidado Afrokódica */}
-                    <footer className="mt-6 flex flex-wrap justify-between items-center gap-6 text-[10px] font-mono text-slate-500 uppercase tracking-widest px-4">
-                        <div className="flex gap-10 items-center">
+                    <footer className="mt-8 flex flex-wrap justify-between items-center gap-6 text-[10px] font-mono text-slate-500 uppercase tracking-[0.3em] px-6">
+                        <div className="flex gap-12 items-center">
                             <div className="flex flex-col">
-                                <span className="text-[8px] text-slate-600 mb-0.5">Sistemas de Inferência</span>
-                                <span className="text-blue-400 font-bold tracking-tighter">AFRO_NEURAL_CORE // 2.0</span>
+                                <span className="text-[7px] text-slate-600 mb-1">Módulo Core</span>
+                                <span className="text-blue-400 font-black">NEURAL_MEC_03</span>
                             </div>
                             <div className="flex flex-col">
-                                <span className="text-[8px] text-slate-600 mb-0.5">Nó de Consciência</span>
-                                <span className="text-white/80">Namibe_Sinapse_Center</span>
+                                <span className="text-[7px] text-slate-600 mb-1">Status de Reciprocidade</span>
+                                <span className="text-white/70">Sincronia Total Ativa</span>
                             </div>
                         </div>
-                        <div className="flex items-center gap-4 bg-blue-900/10 px-6 py-2 rounded-full border border-blue-500/10 shadow-lg">
-                            <span className="text-emerald-500 font-bold animate-pulse">●</span>
-                            <span className="text-slate-300">Estado: Processamento Bio-Virtual Ativo</span>
+                        <div className="flex items-center gap-5 bg-blue-900/10 px-8 py-3 rounded-2xl border border-blue-500/20 shadow-xl backdrop-blur-md">
+                            <span className="text-emerald-400 font-bold animate-pulse text-xs">●</span>
+                            <span className="text-slate-300 font-medium">Protocolo de Aprendizado: Realidade Sináptica</span>
                         </div>
                     </footer>
                 </div>
             );
         }
 
-        const StatBox = ({ label, val, color = "text-white" }) => (
-            <div className="p-3 bg-white/5 border border-white/5 rounded-xl">
-                <p className="text-[7px] text-slate-500 uppercase font-mono mb-1">{label}</p>
-                <p className={`text-xs font-bold ${color}`}>{val}</p>
+        const StatDisplay = ({ label, val, color = "text-white" }) => (
+            <div className="p-4 bg-white/[0.03] border border-white/5 rounded-[1.5rem] hover:bg-white/[0.05] transition-colors group">
+                <p className="text-[7px] text-slate-500 uppercase font-mono mb-2 tracking-widest group-hover:text-blue-400 transition-colors">{label}</p>
+                <p className={`text-sm font-black ${color}`}>{val}</p>
             </div>
         );
 
