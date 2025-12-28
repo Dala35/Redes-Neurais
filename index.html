@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Afrokódica - Redes Neurais v1.0</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #010409; color: #f8fafc; margin: 0; overflow: hidden; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+        .neural-bg { 
+            background: radial-gradient(circle at center, #0a0a2e 0%, #010409 100%);
+        }
+        .node-glow {
+            filter: drop-shadow(0 0 8px currentColor);
+        }
+        @keyframes flow {
+            from { stroke-dashoffset: 100; }
+            to { stroke-dashoffset: 0; }
+        }
+        .synapse-flow {
+            stroke-dasharray: 5, 15;
+            animation: flow 2s linear infinite;
+        }
+        .neural-overlay {
+            background: linear-gradient(180deg, rgba(1,4,9,0.8) 0%, transparent 15%, transparent 85%, rgba(1,4,9,0.8) 100%);
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="neural-bg">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef, useMemo } = React;
+
+        const APP_ID = "AFROKODICA-NEURAL-3.0";
+
+        const GUIDE_MESSAGES = [
+            "As sinapses são pontes entre o visível e o invisível.",
+            "Cada conexão fortalecida é uma memória recuperada.",
+            "A rede aprende com a tua presença, não apenas com os teus dados.",
+            "O conhecimento não está no nó, mas no espaço entre eles.",
+            "Redes Neurais: Onde a lógica encontra a intuição ancestral.",
+            "Sincroniza o teu pulso com o fluxo de disparo da rede."
+        ];
+
+        function App() {
+            const [nodes, setNodes] = useState([]);
+            const [connections, setConnections] = useState([]);
+            const [learningRate, setLearningRate] = useState(0.5);
+            const [activeSignal, setActiveSignal] = useState(null);
+            const [guideIndex, setGuideIndex] = useState(0);
+            const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 1024);
+            const containerRef = useRef(null);
+
+            // Inicialização da Topologia Neural
+            useEffect(() => {
+                const layers = [3, 5, 4, 3]; // Estrutura da rede
+                const newNodes = [];
+                const newConnections = [];
+                
+                layers.forEach((count, layerIdx) => {
+                    for (let i = 0; i < count; i++) {
+                        const node = {
+                            id: `n-${layerIdx}-${i}`,
+                            layer: layerIdx,
+                            x: 15 + layerIdx * 23, // Percentagem horizontal
+                            y: 20 + (i * (60 / (count - 1 || 1))), // Percentagem vertical
+                            value: Math.random()
+                        };
+                        newNodes.push(node);
+
+                        // Conectar com a camada anterior
+                        if (layerIdx > 0) {
+                            const prevLayerNodes = newNodes.filter(n => n.layer === layerIdx - 1);
+                            prevLayerNodes.forEach(prevNode => {
+                                newConnections.push({
+                                    id: `c-${prevNode.id}-${node.id}`,
+                                    from: prevNode.id,
+                                    to: node.id,
+                                    weight: Math.random() * 2 - 1
+                                });
+                            });
+                        }
+                    }
+                });
+                setNodes(newNodes);
+                setConnections(newConnections);
+            }, []);
+
+            useEffect(() => {
+                const interval = setInterval(() => setGuideIndex(prev => (prev + 1) % GUIDE_MESSAGES.length), 7000);
+                return () => clearInterval(interval);
+            }, []);
+
+            const handleNodeClick = (nodeId) => {
+                setActiveSignal(nodeId);
+                // Simulação de "Aprendizado" - Altera pesos aleatoriamente ao redor do nó
+                setConnections(prev => prev.map(conn => {
+                    if (conn.to === nodeId || conn.from === nodeId) {
+                        return { ...conn, weight: Math.min(1, Math.max(-1, conn.weight + (Math.random() - 0.5) * learningRate)) };
+                    }
+                    return conn;
+                }));
+                setTimeout(() => setActiveSignal(null), 1000);
+            };
+
+            return (
+                <div className="h-screen w-full flex flex-col relative z-10 p-4 md:p-6 overflow-hidden select-none">
+                    <div className="neural-overlay absolute inset-0 z-0"></div>
+
+                    {/* Header do Protocolo */}
+                    <header className="flex justify-between items-center z-50 mb-4 bg-black/40 backdrop-blur-xl p-4 rounded-3xl border border-blue-500/20 shadow-2xl">
+                        <div className="flex items-center gap-4">
+                            <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="p-3 hover:bg-blue-500/20 rounded-xl transition-all text-blue-400">
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                                </svg>
+                            </button>
+                            <div>
+                                <h1 className="text-xl md:text-2xl font-black tracking-tighter text-white uppercase italic leading-none flex items-center gap-2">
+                                    Redes_Neurais
+                                    <span className="text-[10px] bg-blue-600 px-2 py-0.5 rounded-full not-italic tracking-normal">MÓDULO 03</span>
+                                </h1>
+                                <p className="text-[8px] font-mono text-blue-400 tracking-[0.3em] uppercase mt-1">Sinapse_BioDigital_Active</p>
+                            </div>
+                        </div>
+                        <div className="hidden md:flex items-center gap-6">
+                            <div className="text-right">
+                                <p className="text-[8px] text-slate-500 uppercase font-mono">Status da Rede</p>
+                                <p className="text-[10px] text-blue-300 font-bold">DYNAMICS_STABLE</p>
+                            </div>
+                            <div className="w-10 h-10 border border-blue-500/30 rounded-2xl flex items-center justify-center text-blue-400 text-xs font-bold bg-blue-500/10 shadow-[0_0_15px_rgba(59,130,246,0.2)]">Σ</div>
+                        </div>
+                    </header>
+
+                    <div className="flex-1 flex gap-6 min-h-0 relative z-10">
+                        {/* Painel de Controlo de Aprendizado */}
+                        <aside className={`
+                            absolute lg:relative inset-y-0 left-0 z-40 w-72 md:w-80 transition-all duration-500
+                            ${isSidebarOpen ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0 lg:hidden'}
+                            flex flex-col gap-6
+                        `}>
+                            <div className="bg-black/60 border border-white/10 p-6 rounded-[2.5rem] space-y-8 backdrop-blur-md shadow-2xl flex-1">
+                                <h3 className="text-[10px] font-mono text-blue-400 uppercase tracking-widest flex items-center gap-3">
+                                    <span className="w-4 h-[1px] bg-blue-500"></span>
+                                    Aprendizado Hebbiano
+                                </h3>
+
+                                <div className="space-y-8">
+                                    <div className="group">
+                                        <div className="flex justify-between items-center mb-3">
+                                            <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest">Taxa de Plasticidade</span>
+                                            <span className="text-blue-400 font-bold text-xs">{learningRate.toFixed(2)}</span>
+                                        </div>
+                                        <input 
+                                            type="range" min="0.01" max="1" step="0.01" 
+                                            value={learningRate} 
+                                            onChange={(e) => setLearningRate(parseFloat(e.target.value))}
+                                            className="w-full h-1 bg-white/10 appearance-none rounded-full accent-blue-500" 
+                                        />
+                                    </div>
+
+                                    <div className="p-4 bg-blue-500/5 border border-blue-500/20 rounded-2xl space-y-4">
+                                        <div className="flex justify-between text-[10px] font-mono">
+                                            <span className="text-slate-400">Total de Neurónios</span>
+                                            <span className="text-white">{nodes.length}</span>
+                                        </div>
+                                        <div className="flex justify-between text-[10px] font-mono">
+                                            <span className="text-slate-400">Sinapses Ativas</span>
+                                            <span className="text-white">{connections.length}</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="mt-auto">
+                                    <h4 className="text-[10px] font-bold text-blue-400 mb-2 uppercase font-mono">Notas de Sistema</h4>
+                                    <p className="text-[11px] text-slate-400 italic leading-relaxed">
+                                        A inteligência aqui não é artificial, é uma extensão da rede de consciência. Cada disparo (click) altera os pesos sinápticos, ensinando a interface a ressonar contigo.
+                                    </p>
+                                </div>
+                            </div>
+                        </aside>
+
+                        {/* Visualizador da Rede Neural */}
+                        <main className="flex-1 relative bg-black/40 rounded-[3rem] border border-white/10 overflow-hidden group shadow-inner">
+                             {/* Mensagem Guia */}
+                             <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
+                                <p className="text-lg md:text-2xl font-light italic text-blue-400/10 text-center max-w-lg px-8 transition-opacity duration-1000">
+                                    "{GUIDE_MESSAGES[guideIndex]}"
+                                </p>
+                            </div>
+
+                            <svg className="w-full h-full relative z-10" viewBox="0 0 100 100" preserveAspectRatio="none">
+                                {/* Linhas de Conexão */}
+                                {connections.map(conn => {
+                                    const fromNode = nodes.find(n => n.id === conn.from);
+                                    const toNode = nodes.find(n => n.id === conn.to);
+                                    if (!fromNode || !toNode) return null;
+
+                                    const isActive = activeSignal === conn.to || activeSignal === conn.from;
+                                    const opacity = 0.1 + Math.abs(conn.weight) * 0.4;
+                                    const color = conn.weight > 0 ? 'rgba(59,130,246' : 'rgba(236,72,153'; // Azul para positivo, Rosa para negativo
+
+                                    return (
+                                        <g key={conn.id}>
+                                            <line 
+                                                x1={fromNode.x} y1={fromNode.y} 
+                                                x2={toNode.x} y2={toNode.y} 
+                                                stroke={`${color}, ${opacity})`}
+                                                strokeWidth={0.2 + Math.abs(conn.weight) * 0.5}
+                                                className="transition-all duration-500"
+                                            />
+                                            {isActive && (
+                                                <line 
+                                                    x1={fromNode.x} y1={fromNode.y} 
+                                                    x2={toNode.x} y2={toNode.y} 
+                                                    stroke="white" 
+                                                    strokeWidth="0.4"
+                                                    className="synapse-flow opacity-60"
+                                                />
+                                            )}
+                                        </g>
+                                    );
+                                })}
+
+                                {/* Neurónios (Nós) */}
+                                {nodes.map(node => (
+                                    <g key={node.id} 
+                                       onClick={() => handleNodeClick(node.id)}
+                                       className="cursor-pointer group/node"
+                                    >
+                                        <circle 
+                                            cx={node.x} cy={node.y} r="1.8" 
+                                            fill="#010409"
+                                            stroke={activeSignal === node.id ? "#fff" : "rgba(59,130,246,0.5)"}
+                                            strokeWidth="0.3"
+                                            className="transition-all duration-300"
+                                        />
+                                        <circle 
+                                            cx={node.x} cy={node.y} r="0.8" 
+                                            fill={activeSignal === node.id ? "#fff" : "#3b82f6"}
+                                            className={`transition-all duration-300 ${activeSignal === node.id ? 'node-glow' : 'opacity-40'}`}
+                                        />
+                                        {/* Efeito de ripple no click */}
+                                        {activeSignal === node.id && (
+                                            <circle cx={node.x} cy={node.y} r="4" fill="none" stroke="white" strokeWidth="0.1" className="animate-ping opacity-20" />
+                                        )}
+                                    </g>
+                                ))}
+                            </svg>
+
+                            {/* Info HUD */}
+                            <div className="absolute bottom-10 right-10 text-right pointer-events-none opacity-40">
+                                <p className="text-[10px] font-mono text-blue-400 uppercase tracking-widest">Sinapses: {connections.length}</p>
+                                <p className="text-[10px] font-mono text-slate-500">POTENTIAL_THRESHOLD: OK</p>
+                            </div>
+                        </main>
+                    </div>
+
+                    {/* Footer Afrokódica */}
+                    <footer className="mt-6 flex flex-wrap justify-between items-center gap-6 text-[10px] font-mono text-slate-500 uppercase tracking-widest px-4">
+                        <div className="flex gap-10 items-center">
+                            <div className="flex flex-col">
+                                <span className="text-[8px] text-slate-600 mb-0.5">Módulo de Processamento</span>
+                                <span className="text-blue-400 font-bold">Neural_Sinapse // MEC-03</span>
+                            </div>
+                            <div className="flex flex-col">
+                                <span className="text-[8px] text-slate-600 mb-0.5">Localização de Sync</span>
+                                <span className="text-white/80">Namibe_Sinapse_Center</span>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-4 bg-blue-900/10 px-6 py-2 rounded-full border border-blue-500/10 shadow-lg">
+                            <span className="text-blue-500 font-bold animate-pulse">●</span>
+                            <span className="text-slate-300 italic">Estado: Autodidatismo Sináptico</span>
+                        </div>
+                    </footer>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
